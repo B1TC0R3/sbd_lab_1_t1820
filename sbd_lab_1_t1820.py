@@ -29,6 +29,10 @@ def get_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def openssl_format(value: int) -> str:
+    return hex(value)[2:].upper()
+
+
 def main():
     args        = get_args()
     private_key = None
@@ -42,7 +46,12 @@ def main():
 
     signer    = pkcs1_15.new(private_key)
     verifier  = pkcs1_15.new(public_key)
-    modulus   = bytearray(str(private_key.n).encode('utf-8'))
+
+    # Remove prepending '0x' from hex string and uppercase it to match OpenSSL output
+    modulus   = bytearray(openssl_format(private_key.n).encode('utf-8'))
+    public_exponent = openssl_format(private_key.d)
+    private_exponent = openssl_format(private_key.e)
+
     data      = SHA256.new(modulus)
     signature = signer.sign(data)
     b64_sign  = base64.b64encode(signature).decode('utf-8')
@@ -50,9 +59,9 @@ def main():
     # This will raise a 'ValueError' if the signature is invalid
     verifier.verify(data, signature)
 
-    print(f"MODULUS: {private_key.n}\n")
-    print(f"PUBLIC EXPONENT: {private_key.d}\n")
-    print(f"PRIVATE EXPONENT: {private_key.e}\n")
+    print(f"MODULUS: {modulus.decode('utf-8')}\n")
+    print(f"PUBLIC EXPONENT: {public_exponent}\n")
+    print(f"PRIVATE EXPONENT: {private_exponent}\n")
     print(f"SIGNATURE: {b64_sign}\n")
 
 
