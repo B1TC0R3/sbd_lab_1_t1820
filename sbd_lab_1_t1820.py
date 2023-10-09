@@ -44,8 +44,8 @@ def main():
     with open(args.public_key) as key_file:
         public_key = RSA.import_key(key_file.read())
 
-    signer    = pkcs1_15.new(private_key)
-    verifier  = pkcs1_15.new(public_key)
+    signer   = pkcs1_15.new(private_key)
+    verifier = pkcs1_15.new(public_key)
 
     # Remove prepending '0x' from hex string and uppercase it to match OpenSSL output
     modulus          = openssl_format(private_key.n)
