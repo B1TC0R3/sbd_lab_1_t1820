@@ -36,7 +36,7 @@ def openssl_format(value: int) -> str:
 def main():
     args        = get_args()
     private_key = None
-    public_key = None
+    public_key  = None
 
     with open(args.private_key) as key_file:
         private_key = RSA.import_key(key_file.read())
@@ -48,18 +48,18 @@ def main():
     verifier  = pkcs1_15.new(public_key)
 
     # Remove prepending '0x' from hex string and uppercase it to match OpenSSL output
-    modulus   = bytearray(openssl_format(private_key.n).encode('utf-8'))
-    public_exponent = openssl_format(private_key.d)
+    modulus          = openssl_format(private_key.n)
+    public_exponent  = openssl_format(private_key.d)
     private_exponent = openssl_format(private_key.e)
 
-    data      = SHA256.new(modulus)
+    data      = SHA256.new(modulus.encode())
     signature = signer.sign(data)
-    b64_sign  = base64.b64encode(signature).decode('utf-8')
+    b64_sign  = base64.b64encode(signature).decode()
 
     # This will raise a 'ValueError' if the signature is invalid
     verifier.verify(data, signature)
 
-    print(f"MODULUS: {modulus.decode('utf-8')}\n")
+    print(f"MODULUS: {modulus}\n")
     print(f"PUBLIC EXPONENT: {public_exponent}\n")
     print(f"PRIVATE EXPONENT: {private_exponent}\n")
     print(f"SIGNATURE: {b64_sign}\n")
